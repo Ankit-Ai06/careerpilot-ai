@@ -1,14 +1,16 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "http://localhost:8080/api",
+  baseURL:
+    import.meta.env.VITE_API_URL ||
+    "http://localhost:8080/api",
 });
 
 api.interceptors.request.use(
   (config) => {
     const publicEndpoints = [
-      "/api/auth/login",
-      "/api/auth/register",
+      "/auth/login",
+      "/auth/register",
     ];
 
     const isPublicEndpoint = publicEndpoints.some((endpoint) =>
@@ -34,8 +36,8 @@ api.interceptors.response.use(
     const status = error.response?.status;
 
     const isAuthRequest = [
-      "/api/auth/login",
-      "/api/auth/register",
+      "/auth/login",
+      "/auth/register",
     ].some((endpoint) =>
       error.config?.url?.startsWith(endpoint)
     );
