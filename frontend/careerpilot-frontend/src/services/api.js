@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "http://localhost:8080/api",
+  baseURL: import.meta.env.VITE_API_URL || "http://localhost:8080/api",
 });
 
 api.interceptors.request.use(
@@ -28,15 +28,15 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// If the backend says our token is invalid/expired, don't leave the
-// user staring at silent failures across every page - log them out
-// and send them back to /login with the reason preserved.
 api.interceptors.response.use(
   (response) => response,
   (error) => {
     const status = error.response?.status;
 
-    const isAuthRequest = ["/auth/login", "/auth/register"].some((endpoint) =>
+    const isAuthRequest = [
+      "/auth/login",
+      "/auth/register",
+    ].some((endpoint) =>
       error.config?.url?.startsWith(endpoint)
     );
 
