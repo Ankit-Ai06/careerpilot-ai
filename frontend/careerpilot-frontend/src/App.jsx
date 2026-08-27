@@ -8,7 +8,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import ResumeAnalyzer from "./pages/ResumeAnalyzer";
 import JobMatch from "./pages/JobMatch";
-import Roadmap from "./pages/Roadmap";
+import Roadmap from "./pages/RoadMap";
 import Interview from "./pages/Interview";
 import Settings from "./pages/Settings";
 
