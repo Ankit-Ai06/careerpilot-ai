@@ -7,8 +7,8 @@ const api = axios.create({
 api.interceptors.request.use(
   (config) => {
     const publicEndpoints = [
-      "/auth/login",
-      "/auth/register",
+      "/api/auth/login",
+      "/api/auth/register",
     ];
 
     const isPublicEndpoint = publicEndpoints.some((endpoint) =>
@@ -34,8 +34,8 @@ api.interceptors.response.use(
     const status = error.response?.status;
 
     const isAuthRequest = [
-      "/auth/login",
-      "/auth/register",
+      "/api/auth/login",
+      "/api/auth/register",
     ].some((endpoint) =>
       error.config?.url?.startsWith(endpoint)
     );
