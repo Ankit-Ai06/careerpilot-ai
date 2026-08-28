@@ -117,8 +117,17 @@ public class ResumeController {
                     "analysis", analysisJson
             ));
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
-        }
+    e.printStackTrace();
+
+    return ResponseEntity.badRequest().body(
+            Map.of(
+                    "message",
+                    e.getMessage() != null
+                            ? e.getMessage()
+                            : e.getClass().getName()
+            )
+    );
+}
     }
 
     @GetMapping("/{resumeId}/score")
