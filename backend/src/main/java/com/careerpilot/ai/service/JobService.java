@@ -7,6 +7,7 @@ import com.careerpilot.ai.exception.ResourceNotFoundException;
 import com.careerpilot.ai.repository.JobRepository;
 import com.careerpilot.ai.repository.UserRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -84,19 +85,24 @@ public class JobService {
     /**
      * Fetches a job and verifies the requesting user owns it.
      */
-    public Job getOwnedJob(Long jobId, String email) {
+   @Transactional(readOnly = true)
+public Job getOwnedJob(Long jobId, String email) {
 
-        Job job = jobRepository.findById(jobId)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException("Job not found")
-                );
+    Job job = jobRepository.findById(jobId)
+            .orElseThrow(() ->
+                    new ResourceNotFoundException("Job not found")
+            );
 
-        if (!job.getUser().getEmail().equalsIgnoreCase(email)) {
-            throw new ForbiddenException("You don't have access to this job");
-        }
+    // Initialize the lazy User relationship while the Hibernate
+    // session is still active.
+    String ownerEmail = job.getUser().getEmail();
 
-        return job;
+    if (!ownerEmail.equalsIgnoreCase(email)) {
+        throw new ForbiddenException("You don't have access to this job");
     }
+
+    return job;
+}
 
     public void deleteJob(Long jobId, String email) {
         Job job = getOwnedJob(jobId, email);

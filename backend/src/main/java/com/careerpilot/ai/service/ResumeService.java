@@ -86,17 +86,24 @@ public class ResumeService {
         return resumeRepository.findByUserOrderByUploadedAtDesc(user);
     }
 
-    @Transactional
-    public Resume getOwnedResume(Long resumeId, String email) {
-        Resume resume = resumeRepository.findById(resumeId)
-                .orElseThrow(() -> new ResourceNotFoundException("Resume not found"));
+@Transactional(readOnly = true)
+public Resume getOwnedResume(Long resumeId, String email) {
 
-        if (!resume.getUser().getEmail().equalsIgnoreCase(email)) {
-            throw new ForbiddenException("You don't have access to this resume");
-        }
+    Resume resume = resumeRepository.findById(resumeId)
+            .orElseThrow(() ->
+                    new ResourceNotFoundException("Resume not found")
+            );
 
-        return resume;
+    // Initialize the lazy User relationship while the Hibernate
+    // session is still active.
+    String ownerEmail = resume.getUser().getEmail();
+
+    if (!ownerEmail.equalsIgnoreCase(email)) {
+        throw new ForbiddenException("You don't have access to this resume");
     }
+
+    return resume;
+}
 
     @Transactional
     public void deleteResume(Long resumeId, String email) {
