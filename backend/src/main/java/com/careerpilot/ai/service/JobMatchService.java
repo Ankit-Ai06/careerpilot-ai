@@ -7,6 +7,7 @@ import com.careerpilot.ai.entity.Resume;
 import com.careerpilot.ai.exception.ResourceNotFoundException;
 import com.careerpilot.ai.repository.JobMatchRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.json.JsonMapper;
@@ -38,6 +39,7 @@ public class JobMatchService {
      * Runs a fresh AI match between a job (owned by the caller) and a
      * resume (also owned by the caller), then stores and returns it.
      */
+    @Transactional
     public JobMatch runMatch(Long jobId, Long resumeId, String email) {
 
         Job job = jobService.getOwnedJob(jobId, email);
