@@ -86,7 +86,7 @@ public class JobService {
      * Fetches a job and verifies the requesting user owns it.
      */
    @Transactional(readOnly = true)
-public Job getOwnedJob(Long jobId, String email) {
+    public Job getOwnedJob(Long jobId, String email) {
 
     Job job = jobRepository.findById(jobId)
             .orElseThrow(() ->

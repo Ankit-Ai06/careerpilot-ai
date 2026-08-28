@@ -87,7 +87,7 @@ public class ResumeService {
     }
 
 @Transactional(readOnly = true)
-public Resume getOwnedResume(Long resumeId, String email) {
+    public Resume getOwnedResume(Long resumeId, String email) {
 
     Resume resume = resumeRepository.findById(resumeId)
             .orElseThrow(() ->

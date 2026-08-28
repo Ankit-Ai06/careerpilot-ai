@@ -12,6 +12,7 @@ import com.careerpilot.ai.repository.JobRepository;
 import com.careerpilot.ai.repository.ResumeRepository;
 import com.careerpilot.ai.repository.UserRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.json.JsonMapper;
 
@@ -46,6 +47,7 @@ public class DashboardService {
         this.jsonMapper = jsonMapper;
     }
 
+    @Transactional(readOnly = true)
     public Map<String, Object> getDashboard(String email) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));

@@ -37,6 +37,7 @@ public class RoadmapService {
         this.geminiService = geminiService;
     }
 
+    @Transactional
     public CareerRoadmap generate(Long matchId, String email) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
@@ -49,7 +50,11 @@ public class RoadmapService {
         }
 
         CareerRoadmap existing = roadmapRepository.findFirstByJobMatch(match).orElse(null);
-        if (existing != null) return existing;
+        if (existing != null) {
+            // Initialize lazy items before the transaction closes; the controller maps them after return.
+            existing.getItems().size();
+            return existing;
+        }
 
         CareerRoadmap roadmap = new CareerRoadmap();
         roadmap.setUser(user);
@@ -86,12 +91,17 @@ public class RoadmapService {
         return roadmapRepository.save(roadmap);
     }
 
+    @Transactional(readOnly = true)
     public List<CareerRoadmap> list(String email) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
-        return roadmapRepository.findByUserOrderByCreatedAtDesc(user);
+        List<CareerRoadmap> roadmaps = roadmapRepository.findByUserOrderByCreatedAtDesc(user);
+        // Initialize lazy roadmap items before the transaction closes; the controller maps them after this method returns.
+        roadmaps.forEach(roadmap -> roadmap.getItems().size());
+        return roadmaps;
     }
 
+    @Transactional
     public RoadmapItem updateItem(Long itemId, int progress, String email) {
         RoadmapItem item = itemRepository.findById(itemId)
                 .orElseThrow(() -> new ResourceNotFoundException("Roadmap item not found"));

@@ -77,6 +77,7 @@ public class JobMatchService {
         }
     }
 
+    @Transactional(readOnly = true)
     public JobMatch getLatestMatch(Long jobId, String email) {
 
         Job job = jobService.getOwnedJob(jobId, email);
