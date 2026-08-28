@@ -86,6 +86,7 @@ public class ResumeService {
         return resumeRepository.findByUserOrderByUploadedAtDesc(user);
     }
 
+    @Transactional
     public Resume getOwnedResume(Long resumeId, String email) {
         Resume resume = resumeRepository.findById(resumeId)
                 .orElseThrow(() -> new ResourceNotFoundException("Resume not found"));
