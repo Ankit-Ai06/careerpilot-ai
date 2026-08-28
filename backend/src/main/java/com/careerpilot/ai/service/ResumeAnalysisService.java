@@ -35,48 +35,53 @@ public class ResumeAnalysisService {
     @Transactional
     public ResumeAnalysis analyzeResume(Long resumeId) {
 
-        // Find the uploaded resume inside an active Hibernate transaction.
         Resume resume = resumeRepository.findById(resumeId)
                 .orElseThrow(() ->
                         new RuntimeException("Resume not found")
                 );
 
-        // Access the user while the Hibernate session is active.
-        // This prevents LazyInitializationException when the User
-        // relationship is accessed during the analysis flow.
-        resume.getUser().getEmail();
+        // Force-load the user while the Hibernate session is active.
+        resume.getUser().getId();
+
+        String extractedText = resume.getExtractedText();
+
+        if (extractedText == null || extractedText.isBlank()) {
+            throw new RuntimeException(
+                    "Resume text could not be extracted"
+            );
+        }
 
         // Send resume text to Gemini.
-        String aiResult = geminiService.analyzeResume(
-                resume.getExtractedText()
-        );
+        String aiResult = geminiService.analyzeResume(extractedText);
 
         try {
 
-            // Parse Gemini response as JSON.
             JsonNode jsonNode = jsonMapper.readTree(aiResult);
 
-            // Convert it into clean JSON.
-            String cleanJson = jsonMapper.writeValueAsString(jsonNode);
+            if (jsonNode == null) {
+                throw new RuntimeException(
+                        "Gemini returned an empty response"
+                );
+            }
 
-            // Find existing analysis or create a new one.
-            ResumeAnalysis analysis = analysisRepository
-                    .findByResumeId(resumeId)
-                    .orElseGet(ResumeAnalysis::new);
+            String cleanJson =
+                    jsonMapper.writeValueAsString(jsonNode);
 
-            // Connect analysis to resume.
+            ResumeAnalysis analysis =
+                    analysisRepository
+                            .findByResumeId(resumeId)
+                            .orElseGet(ResumeAnalysis::new);
+
             analysis.setResume(resume);
-
-            // Save clean JSON.
             analysis.setAnalysisJson(cleanJson);
 
-            // Save to database.
             return analysisRepository.save(analysis);
 
         } catch (Exception e) {
 
             throw new RuntimeException(
-                    "Invalid JSON returned by Gemini",
+                    "Invalid JSON returned by Gemini: "
+                            + e.getMessage(),
                     e
             );
         }
